@@ -114,7 +114,7 @@ begin
 --------------------------
 --   Next State Logic   --
 --------------------------
-process(up_down,stop,clk)
+process(up_down,stop,clk) -- include clk to update on the way down if up_down and stop do not change
 begin
 	case floor_state is
 		--when our current state is floor1
