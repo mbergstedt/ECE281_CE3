@@ -37,79 +37,152 @@ type floor_state_type is (floor1, floor2, floor3, floor4);
 
 --Here you create a variable "floor_state" that can take on the values
 --defined above. Neat-o!
-signal floor_state : floor_state_type;
+signal floor_state, next_state : floor_state_type;
 
 begin
 ---------------------------------------------
 --Below you will code your next-state process
 ---------------------------------------------
 
---This line will set up a process that is sensitive to the clock
-floor_state_machine: process(clk)
+----This line will set up a process that is sensitive to the clock
+--floor_state_machine: process(clk)
+--begin
+--	--clk'event and clk='1' is VHDL-speak for a rising edge
+--	if clk'event and clk='1' then   --use rising_edge(clk) instead--
+--		--reset is active high and will return the elevator to floor1
+--		--Question: is reset synchronous or asynchronous?
+--		if reset='1' then  -- synchronous because it checks the clock first
+--			floor_state <= floor1;
+--		--now we will code our next-state logic
+--		else
+--			case floor_state is
+--				--when our current state is floor1
+--				when floor1 =>
+--					--if up_down is set to "go up" and stop is set to 
+--					--"don't stop" which floor do we want to go to?
+--					if (up_down='1' and stop='0') then 
+--						--floor2 right?? This makes sense!
+--						floor_state <= floor2;
+--					--otherwise we're going to stay at floor1
+--					else
+--						floor_state <= floor1;
+--					end if;
+--				--when our current state is floor2
+--				when floor2 => 
+--					--if up_down is set to "go up" and stop is set to 
+--					--"don't stop" which floor do we want to go to?
+--					if (up_down='1' and stop='0') then 
+--						floor_state <= floor3; 			
+--					--if up_down is set to "go down" and stop is set to 
+--					--"don't stop" which floor do we want to go to?
+--					elsif (up_down='0' and stop='0') then 
+--						floor_state <= floor1;
+--					--otherwise we're going to stay at floor2
+--					else
+--						floor_state <= floor2;
+--					end if;
+--				
+----COMPLETE THE NEXT STATE LOGIC ASSIGNMENTS FOR FLOORS 3 AND 4
+--				when floor3 =>
+--					--going up and not stopping, go up one floor
+--					if (up_down='1' and stop='0') then 
+--						floor_state <= floor4;
+--					--not going up and not stopping, go down one floor
+--					elsif (up_down='0' and stop='0') then 
+--						floor_state <= floor2;
+--					--stopping, so stay on floor
+--					else
+--						floor_state <= floor3;
+--					end if;
+--				when floor4 =>
+--					--not going up and not stopping, go down one floor
+--					if (up_down='0' and stop='0') then 
+--						floor_state <= floor3;
+--					--at top or stopping so can't go any higher
+--					else 
+--						floor_state <= floor4;
+--					end if;
+--				
+--				--This line accounts for phantom states
+--				when others =>
+--					floor_state <= floor1;
+--			end case;
+--		end if;
+--	end if;
+--end process;  --all together, separate into three boxes
+
+--------------------------
+--   Next State Logic   --
+--------------------------
+process(up_down,stop,clk)
 begin
-	--clk'event and clk='1' is VHDL-speak for a rising edge
-	if clk'event and clk='1' then   --use rising_edge(clk) instead--
-		--reset is active high and will return the elevator to floor1
-		--Question: is reset synchronous or asynchronous?
-		if reset='1' then  -- synchronous because it checks the clock first
-			floor_state <= floor1;
-		--now we will code our next-state logic
-		else
-			case floor_state is
-				--when our current state is floor1
-				when floor1 =>
-					--if up_down is set to "go up" and stop is set to 
-					--"don't stop" which floor do we want to go to?
-					if (up_down='1' and stop='0') then 
-						--floor2 right?? This makes sense!
-						floor_state <= floor2;
-					--otherwise we're going to stay at floor1
-					else
-						floor_state <= floor1;
-					end if;
-				--when our current state is floor2
-				when floor2 => 
-					--if up_down is set to "go up" and stop is set to 
-					--"don't stop" which floor do we want to go to?
-					if (up_down='1' and stop='0') then 
-						floor_state <= floor3; 			
-					--if up_down is set to "go down" and stop is set to 
-					--"don't stop" which floor do we want to go to?
-					elsif (up_down='0' and stop='0') then 
-						floor_state <= floor1;
-					--otherwise we're going to stay at floor2
-					else
-						floor_state <= floor2;
-					end if;
-				
+	case floor_state is
+		--when our current state is floor1
+		when floor1 =>
+			--if up_down is set to "go up" and stop is set to 
+			--"don't stop" which floor do we want to go to?
+			if (up_down='1' and stop='0') then 
+				--floor2 right?? This makes sense!
+				next_state <= floor2;
+			--otherwise we're going to stay at floor1
+			else
+				next_state <= floor1;
+			end if;
+		--when our current state is floor2
+		when floor2 => 
+			--if up_down is set to "go up" and stop is set to 
+			--"don't stop" which floor do we want to go to?
+			if (up_down='1' and stop='0') then 
+				next_state <= floor3; 			
+			--if up_down is set to "go down" and stop is set to 
+			--"don't stop" which floor do we want to go to?
+			elsif (up_down='0' and stop='0') then 
+				next_state <= floor1;
+			--otherwise we're going to stay at floor2
+			else
+				next_state <= floor2;
+			end if;
+		
 --COMPLETE THE NEXT STATE LOGIC ASSIGNMENTS FOR FLOORS 3 AND 4
-				when floor3 =>
-					--going up and not stopping, go up one floor
-					if (up_down='1' and stop='0') then 
-						floor_state <= floor4;
-					--not going up and not stopping, go down one floor
-					elsif (up_down='0' and stop='0') then 
-						floor_state <= floor2;
-					--stopping, so stay on floor
-					else
-						floor_state <= floor3;
-					end if;
-				when floor4 =>
-					--not going up and not stopping, go down one floor
-					if (up_down='0' and stop='0') then 
-						floor_state <= floor3;
-					--at top or stopping so can't go any higher
-					else 
-						floor_state <= floor4;
-					end if;
-				
-				--This line accounts for phantom states
-				when others =>
-					floor_state <= floor1;
-			end case;
+		when floor3 =>
+			--going up and not stopping, go up one floor
+			if (up_down='1' and stop='0') then 
+				next_state <= floor4;
+			--not going up and not stopping, go down one floor
+			elsif (up_down='0' and stop='0') then 
+				next_state <= floor2;
+			--stopping, so stay on floor
+			else
+				next_state <= floor3;
+			end if;
+		when floor4 =>
+			--not going up and not stopping, go down one floor
+			if (up_down='0' and stop='0') then 
+				next_state <= floor3;
+			--at top or stopping so can't go any higher
+			else 
+				next_state <= floor4;
+			end if;
+		
+		--This line accounts for phantom states
+		when others =>
+			next_state <= floor1;
+	end case;
+end process;
+
+--------------------------
+--     State Memory     --
+--------------------------
+process(reset,clk)
+begin
+	if rising_edge(clk) then
+		if reset = '1' then
+			floor_state <= floor1;
+		else
+			floor_state <= next_state;
 		end if;
 	end if;
-end process;  --all together, separate into three boxes
+end process;
 
 -- Here you define your output logic. Finish the statements below
 floor <= "0001" when (floor_state = floor1) else
